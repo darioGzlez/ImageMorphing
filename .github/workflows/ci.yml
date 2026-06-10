@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package (Swift ${{ matrix.language-mode }} mode)
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        language-mode: [5, 6]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build -Xswiftc -swift-version -Xswiftc ${{ matrix.language-mode }} -Xswiftc -warnings-as-errors
+      - name: Test
+        run: swift test -Xswiftc -swift-version -Xswiftc ${{ matrix.language-mode }} -Xswiftc -warnings-as-errors
+
+  platforms:
+    name: ${{ matrix.name }}
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: iOS
+            destination: generic/platform=iOS
+          - name: macOS
+            destination: generic/platform=macOS
+          - name: tvOS
+            destination: generic/platform=tvOS
+          - name: Mac Catalyst
+            destination: generic/platform=macOS,variant=Mac Catalyst
+          - name: visionOS
+            destination: generic/platform=visionOS
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build package
+        run: >-
+          xcodebuild
+          -scheme ImageMorphing
+          -destination '${{ matrix.destination }}'
+          CODE_SIGNING_ALLOWED=NO
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
+          build
+
+  demo:
+    name: Demo (${{ matrix.name }})
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: iOS
+            destination: generic/platform=iOS
+          - name: macOS
+            destination: generic/platform=macOS
+          - name: Mac Catalyst
+            destination: generic/platform=macOS,variant=Mac Catalyst
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build demo
+        run: >-
+          xcodebuild
+          -project Demo/Demo.xcodeproj
+          -scheme Demo
+          -destination '${{ matrix.destination }}'
+          CODE_SIGNING_ALLOWED=NO
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
+          build
+
+  quality:
+    name: Format, API, and DocC
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check formatting
+        run: xcrun swift-format lint --strict --recursive Package.swift Sources Tests Demo/Demo
+      - name: Check API compatibility
+        if: github.event_name == 'pull_request'
+        run: swift package diagnose-api-breaking-changes "origin/${{ github.base_ref }}"
+      - name: Build DocC documentation
+        run: >-
+          xcodebuild docbuild
+          -scheme ImageMorphing
+          -destination 'generic/platform=macOS'
+          CODE_SIGNING_ALLOWED=NO
+          OTHER_DOCC_FLAGS='--warnings-as-errors'
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
