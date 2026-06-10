@@ -5,6 +5,15 @@ All notable changes are documented here. This project follows
 
 ## Unreleased
 
+## 1.2.0 - 2026-06-10
+
+### Added
+
+- Configurable proportional blur intensity through
+  `morphingImageBlurRadiusScale(_:)`, preserving the existing `0.05` default.
+
+## 1.1.0 - 2026-06-10
+
 ### Added
 
 - Swift 6 language mode, strict-concurrency validation, and warnings-as-errors CI.
