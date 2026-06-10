@@ -41,14 +41,35 @@ final class MorphingImageConfigurationTests: XCTestCase {
     XCTAssertEqual(configuration.blurRadius(for: CGSize(width: CGFloat.infinity, height: 100)), 5)
   }
 
+  func testBlurRadiusScale() {
+    XCTAssertEqual(
+      configuration().blurRadius(for: CGSize(width: 16, height: 16)),
+      0.8,
+      accuracy: 0.000_001
+    )
+    XCTAssertEqual(
+      configuration(blurRadiusScale: 0.3).blurRadius(for: CGSize(width: 16, height: 16)),
+      4.8,
+      accuracy: 0.000_001
+    )
+  }
+
+  func testBlurRadiusScaleValidation() {
+    XCTAssertEqual(configuration(blurRadiusScale: -1).blurRadiusScale, 0)
+    XCTAssertEqual(configuration(blurRadiusScale: .infinity).blurRadiusScale, 0)
+    XCTAssertEqual(configuration(blurRadiusScale: .nan).blurRadiusScale, 0)
+  }
+
   private func configuration(
     maximumBlurRadius: Double = 20,
+    blurRadiusScale: Double = 0.05,
     alphaThreshold: Double = 0.5
   ) -> MorphingImageConfiguration {
     MorphingImageConfiguration(
       duration: 1,
       curve: .easeInOut,
       maximumBlurRadius: maximumBlurRadius,
+      blurRadiusScale: blurRadiusScale,
       alphaThreshold: alphaThreshold
     )
   }
@@ -132,6 +153,7 @@ final class MorphingImageInitializerTests: XCTestCase {
       .morphingImageDuration(1.5)
       .morphingImageAnimationCurve(.linear)
       .morphingImageMaximumBlurRadius(12)
+      .morphingImageBlurRadiusScale(0.3)
       .morphingImageAlphaThreshold(0.7)
       .foregroundStyle(.red)
 

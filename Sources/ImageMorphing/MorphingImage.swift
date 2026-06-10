@@ -198,23 +198,27 @@ struct MorphingImageConfiguration: Hashable {
     duration: 1,
     curve: .easeInOut,
     maximumBlurRadius: 20,
+    blurRadiusScale: 0.05,
     alphaThreshold: 0.5
   )
 
   var duration: Double
   var curve: MorphingImageAnimationCurve
   var maximumBlurRadius: Double
+  var blurRadiusScale: Double
   var alphaThreshold: Double
 
   init(
     duration: Double,
     curve: MorphingImageAnimationCurve,
     maximumBlurRadius: Double,
+    blurRadiusScale: Double,
     alphaThreshold: Double
   ) {
     self.duration = Self.normalizedNonnegative(duration)
     self.curve = curve
     self.maximumBlurRadius = Self.normalizedNonnegative(maximumBlurRadius)
+    self.blurRadiusScale = Self.normalizedNonnegative(blurRadiusScale)
     self.alphaThreshold =
       alphaThreshold.isFinite
       ? min(max(alphaThreshold, 0), 1)
@@ -224,7 +228,7 @@ struct MorphingImageConfiguration: Hashable {
   func blurRadius(for size: CGSize) -> Double {
     let width = size.width.isFinite ? max(size.width, 0) : 0
     let height = size.height.isFinite ? max(size.height, 0) : 0
-    return min(max(width, height) * 0.05, maximumBlurRadius)
+    return min(max(width, height) * blurRadiusScale, maximumBlurRadius)
   }
 
   static func normalizedNonnegative(_ value: Double) -> Double {
@@ -286,6 +290,16 @@ extension View {
   public func morphingImageMaximumBlurRadius(_ value: Double) -> some View {
     transformEnvironment(\.morphingImageConfiguration) {
       $0.maximumBlurRadius = MorphingImageConfiguration.normalizedNonnegative(value)
+    }
+  }
+
+  /// Sets the scale used to calculate the blur radius from the image size.
+  ///
+  /// The default scale is `0.05`. Negative and non-finite values are treated
+  /// as zero.
+  public func morphingImageBlurRadiusScale(_ value: Double) -> some View {
+    transformEnvironment(\.morphingImageConfiguration) {
+      $0.blurRadiusScale = MorphingImageConfiguration.normalizedNonnegative(value)
     }
   }
 

@@ -31,8 +31,8 @@ MorphingImage(image: image, id: imageIdentifier)
 - ``MorphingImageAnimationCurve``
 
 Use `morphingImageDuration(_:)`, `morphingImageAnimationCurve(_:)`,
-`morphingImageMaximumBlurRadius(_:)`, and `morphingImageAlphaThreshold(_:)` to
-configure a transition.
+`morphingImageMaximumBlurRadius(_:)`, `morphingImageBlurRadiusScale(_:)`, and
+`morphingImageAlphaThreshold(_:)` to configure a transition.
 
 ### Guides
 

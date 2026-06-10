@@ -79,6 +79,7 @@ MorphingImage(systemName: symbolName)
     .morphingImageDuration(1.5)
     .morphingImageAnimationCurve(.easeInOut)
     .morphingImageMaximumBlurRadius(20)
+    .morphingImageBlurRadiusScale(0.05)
     .morphingImageAlphaThreshold(0.5)
 ```
 
@@ -89,7 +90,14 @@ On iOS 16, macOS 13, tvOS 16, visionOS 1, or newer, use `Duration`:
 ```
 
 Negative and non-finite durations become zero. A zero duration displays the
-final image immediately. Alpha thresholds are clamped to `0...1`.
+final image immediately. Alpha thresholds are clamped to `0...1`. Increase the
+blur radius scale for small images that need a stronger morphing effect:
+
+```swift
+MorphingImage(systemName: symbolName)
+    .morphingImageBlurRadiusScale(0.3)
+    .frame(width: 16, height: 16)
+```
 
 ## Accessibility
 
